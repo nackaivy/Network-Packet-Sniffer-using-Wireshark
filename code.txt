@@ -1,0 +1,33 @@
+import struct
+import socket
+
+def get_ipv4(addr):
+    return '.'.join(map(str, addr))
+
+def ipv4_packet(data):
+    version_header_length = data[0]
+    header_length = (version_header_length & 0x0F) * 4
+    ttl, proto, src, target = struct.unpack('!8xBB2x4s4s', data[:20])
+    return header_length, ttl, proto, get_ipv4(src), get_ipv4(target), data[header_length:]
+
+def main():
+    raw_ipv4_packet = (
+        b'\x45\x00\x00\x54'  
+        b'\xa6\xf2\x40\x00'  
+        b'\x40\x01\x00\x00'
+        b'\xc0\xa8\x01\x01'  
+        b'\xc0\xa8\x01\x02'  
+        b'payload_data_here'  
+    )
+
+    header_length, ttl, proto, src_ip, dest_ip, payload = ipv4_packet(raw_ipv4_packet)
+
+    print("Parsed IPv4 Packet:")
+    print(f"  Source IP:      {src_ip}")
+    print(f"  Destination IP: {dest_ip}")
+    print(f"  TTL:            {ttl}")
+    print(f"  Protocol:       {proto}")
+    print(f"  Payload (raw):  {payload}")
+
+if _name_ == "_main_":
+    main()
